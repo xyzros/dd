@@ -127,7 +127,7 @@ esac
 
 #######download and extract ROS image zip file
 #ros version
-#ROS_VER="6.49.15"
+#ROS_VER="6.49.17"
 ROS_VER=` curl -sL https://download.mikrotik.com/routeros/latest-stable-and-long-term.rss | awk '/<title>RouterOS.*\[stable\]/ {print $2}' `
 echo "ROS image version : $ROS_VER"
 
@@ -246,17 +246,19 @@ EOF
 fi
 
 ###add extra packages and enable container mode
-wget https://download.mikrotik.com/routeros/$ROS_VER/all_packages-x86-$ROS_VER.zip -O all_packages-x86.zip
-unzip -j all_packages-x86.zip container-$ROS_VER.npk rose-storage-$ROS_VER.npk -d ./
-[ $? -ne 0 ] && echo 'ROS extra packages extraction failed!' && exit 1
+if [ -z "$VER_6" ]; then
+	wget https://download.mikrotik.com/routeros/$ROS_VER/all_packages-x86-$ROS_VER.zip -O all_packages-x86.zip
+	unzip -j all_packages-x86.zip container-$ROS_VER.npk rose-storage-$ROS_VER.npk -d ./
+	[ $? -ne 0 ] && echo 'ROS extra packages extraction failed!' && exit 1
 
-mkdir /mnt/ros/var/pdb/rose-storage
-mv ./rose-storage-$ROS_VER.npk /mnt/ros/var/pdb/rose-storage/image
+	mkdir /mnt/ros/var/pdb/rose-storage
+	mv ./rose-storage-$ROS_VER.npk /mnt/ros/var/pdb/rose-storage/image
 
-mkdir /mnt/ros/var/pdb/container
-mv ./container-$ROS_VER.npk /mnt/ros/var/pdb/container/image
-wget -P /mnt/ros/rw https://github.com/xyzros/dd/raw/main/rosmode.msg
-[ $? -ne 0 ] && echo 'rosmode.msg download failed!' && exit 1
+	mkdir /mnt/ros/var/pdb/container
+	mv ./container-$ROS_VER.npk /mnt/ros/var/pdb/container/image
+	wget -P /mnt/ros/rw https://github.com/xyzros/dd/raw/main/rosmode.msg
+	[ $? -ne 0 ] && echo 'rosmode.msg download failed!' && exit 1
+fi
 
 sync
 umount /mnt/ros
